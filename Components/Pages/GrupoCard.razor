@@ -1,0 +1,53 @@
+@using ihcux_racha_ai_blazor.Models
+
+<div class="card border-0 shadow-sm p-3 mb-3 rounded-4">
+
+    <div class="d-flex justify-content-between align-items-center">
+
+        <div>
+
+            <small class="text-muted fw-bold">
+                @Grupo.Categoria
+            </small>
+
+            <h5 class="fw-bold mb-0">
+                @Grupo.Nome
+            </h5>
+
+        </div>
+
+        <div class="text-end">
+
+            @if (Grupo.UsuarioDeve)
+            {
+                <small class="text-muted">
+                    Você deve
+                </small>
+
+                <h5 class="text-danger fw-bold mb-0">
+                    R$ @Grupo.Valor
+                </h5>
+            }
+            else
+            {
+                <small class="text-muted">
+                    Você recebe
+                </small>
+
+                <h5 class="text-success fw-bold mb-0">
+                    R$ @Grupo.Valor
+                </h5>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+@code {
+
+    [Parameter]
+    public Grupo Grupo { get; set; } = new();
+
+}

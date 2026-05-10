@@ -1,0 +1,343 @@
+@page "/dashboard"
+@rendermode InteractiveServer
+
+@using ihcux_racha_ai_blazor.Models
+
+<div class="container mt-4">
+
+    <!-- TOPO -->
+
+    <div class="d-flex align-items-center justify-content-between mb-4">
+
+        <div>
+
+            <h1 class="fw-bold">
+              Matheus lucas
+            </h1>
+
+            <small class="text-muted">
+                Controle suas finanças coletivas
+            </small>
+
+        </div>
+
+        <img
+            src="https://i.pinimg.com/736x/72/97/62/72976236f7a13f5076b620c02457a917.jpg"
+            style="
+                width:80px;
+                height:80px;
+                border-radius:50%;
+                object-fit:cover;
+            " />
+
+    </div>
+
+    <!-- CARDS -->
+
+    <div class="row mb-4">
+
+        <!-- SALDO GERAL -->
+
+        <div class="col-md-4">
+
+            <div class="card bg-primary text-white p-3 shadow">
+
+                <h5>Saldo Geral</h5>
+
+                <h2>
+                    R$ @SaldoGeral
+                </h2>
+
+            </div>
+
+        </div>
+
+        <!-- A RECEBER -->
+
+        <div class="col-md-4">
+
+            <div class="card bg-success text-white p-3 shadow">
+
+                <h5>A Receber</h5>
+
+                <h2>
+                    R$ @TotalReceber
+                </h2>
+
+            </div>
+
+        </div>
+
+        <!-- A PAGAR -->
+
+        <div class="col-md-4">
+
+            <div class="card bg-danger text-white p-3 shadow">
+
+                <h5>A Pagar</h5>
+
+                <h2>
+                    R$ @TotalPagar
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ADICIONAR GRUPO -->
+
+    <div class="card p-4 shadow mb-4">
+
+        <h4 class="mb-3">
+            Adicionar Grupo
+        </h4>
+
+        <div class="row">
+
+            <div class="col-md-3 mb-2">
+
+                <input class="form-control"
+                       placeholder="Nome"
+                       @bind="novoNome" />
+
+            </div>
+
+            <div class="col-md-3 mb-2">
+
+                <input class="form-control"
+                       placeholder="Categoria"
+                       @bind="novaCategoria" />
+
+            </div>
+
+            <div class="col-md-2 mb-2">
+
+                <input type="number"
+                       class="form-control"
+                       placeholder="Valor"
+                       @bind="novoValor" />
+
+            </div>
+
+            <div class="col-md-2 mb-2 d-flex align-items-center">
+
+                <input type="checkbox"
+                       class="form-check-input me-2"
+                       @bind="usuarioDeve" />
+
+                <label>
+                    Deve
+                </label>
+
+            </div>
+
+            <div class="col-md-2 mb-2">
+
+                <button class="btn btn-success w-100"
+                        @onclick="AdicionarGrupo">
+
+                    Adicionar
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- PESQUISA -->
+
+    <input class="form-control mb-4"
+           placeholder="Pesquisar grupo..."
+           @bind="busca"
+           @bind:event="oninput" />
+
+    <!-- TITULO -->
+
+    <h4 class="mb-3">
+        Seus Grupos Ativos
+    </h4>
+
+    <!-- LISTA -->
+
+    @if (GruposFiltrados.Any())
+    {
+        @foreach (var grupo in GruposFiltrados)
+        {
+            <div class="card shadow-sm mb-3 p-3">
+
+                <div class="d-flex justify-content-between">
+
+                    <div>
+
+                        <small class="text-muted">
+                            @grupo.Categoria
+                        </small>
+
+                        <h5>
+                            @grupo.Nome
+                        </h5>
+
+                    </div>
+
+                    <div class="text-end">
+
+                        @if (grupo.UsuarioDeve)
+                        {
+                            <small class="text-danger fw-bold">
+                                Você deve
+                            </small>
+
+                            <h5 class="text-danger">
+                                R$ @grupo.Valor
+                            </h5>
+                        }
+                        else
+                        {
+                            <small class="text-success fw-bold">
+                                Você recebe
+                            </small>
+
+                            <h5 class="text-success">
+                                R$ @grupo.Valor
+                            </h5>
+                        }
+
+                        <button class="btn btn-danger btn-sm"
+                                @onclick="() => ExcluirGrupo(grupo)">
+
+                            Excluir
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info">
+
+            Você ainda não participa de nenhum grupo.
+            Que tal criar um?
+
+        </div>
+    }
+
+</div>
+
+@code {
+
+    private string busca = "";
+
+    private string novoNome = "";
+
+    private string novaCategoria = "";
+
+    private decimal novoValor;
+
+    private bool usuarioDeve;
+
+    // GRUPOS
+
+    private List<Grupo> grupos = new()
+    {
+        new Grupo
+        {
+            Nome = "República Central",
+            Categoria = "Casa",
+            Valor = 450.50m,
+            UsuarioDeve = true
+        },
+
+        new Grupo
+        {
+            Nome = "Churrasco de Domingo",
+            Categoria = "Lazer",
+            Valor = 85.00m,
+            UsuarioDeve = false
+        },
+
+        new Grupo
+        {
+            Nome = "Viagem Floripa",
+            Categoria = "Viagem",
+            Valor = 1200.00m,
+            UsuarioDeve = false
+        },
+
+        new Grupo
+        {
+            Nome = "Netflix & Internet",
+            Categoria = "Contas",
+            Valor = 35.90m,
+            UsuarioDeve = true
+        }
+    };
+
+    // PESQUISA
+
+    private List<Grupo> GruposFiltrados =>
+        grupos.Where(g =>
+
+            g.Nome.Contains(
+                busca,
+                StringComparison.OrdinalIgnoreCase
+            )
+
+            ||
+
+            g.Categoria.Contains(
+                busca,
+                StringComparison.OrdinalIgnoreCase
+            )
+
+        ).ToList();
+
+    // ADICIONAR
+
+    private void AdicionarGrupo()
+    {
+        grupos.Add(new Grupo
+        {
+            Nome = novoNome,
+            Categoria = novaCategoria,
+            Valor = novoValor,
+            UsuarioDeve = usuarioDeve
+        });
+
+        novoNome = "";
+        novaCategoria = "";
+        novoValor = 0;
+        usuarioDeve = false;
+    }
+
+    // EXCLUIR
+
+    private void ExcluirGrupo(Grupo grupo)
+    {
+        grupos.Remove(grupo);
+    }
+
+    // CARDS
+
+    private decimal TotalReceber =>
+        grupos
+            .Where(g => !g.UsuarioDeve)
+            .Sum(g => g.Valor);
+
+    private decimal TotalPagar =>
+        grupos
+            .Where(g => g.UsuarioDeve)
+            .Sum(g => g.Valor);
+
+    private decimal SaldoGeral =>
+        TotalReceber - TotalPagar;
+
+}
